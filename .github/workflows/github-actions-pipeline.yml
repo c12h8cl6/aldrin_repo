@@ -8,9 +8,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+
 
     env:
       URL: ${{ secrets.FETCH_PROJECT_URL }}&downloadDrivers=true&osType=${{ runner.os }}&isMainBranch=true
