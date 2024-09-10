@@ -1,7 +1,7 @@
 name: actions-CICD
 
-on:
-  schedule:
+on: [push]
+# schedule:
 #    - cron: "*/30 22-23 * * 0-5"
 #    - cron: "*/30 0-10 * * 1-5"
 
@@ -51,7 +51,7 @@ jobs:
           echo "::set-output name=ACCESS_TOKEN::$ACCESS_TOKEN"
 
       - name: Display the extracted access_token
-        run: echo "Access Token: ${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
+        run: echo "Access Token:${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
 
       - name: Download Project
         run: |
