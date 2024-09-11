@@ -6,7 +6,7 @@ steps:
          # java-version: '21'
           #distribution: 'adopt'
 
-     jobs:
+    # jobs:
      generate-token:
      runs-on: [self-hosted, linux, x64]
      steps:
