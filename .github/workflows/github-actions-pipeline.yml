@@ -1,12 +1,25 @@
 on: workflow_dispatch
-
-jobs:
-  if-Windows-else:
-    runs-on: [self-hosted, linux, x64]
     steps:
-      - name: condition 1
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Validate Java 21 in Windows
         if: runner.os == 'Windows'
-        run: echo "The operating system on the runner is $env:RUNNER_OS."
-      - name: condition 2
+        run: |
+          java -version 2>&1 | findstr /C:"version \"21"
+          if %errorlevel% == 0 (
+            echo Java 21 is installed
+          ) else (
+            echo Java 21 is not installed
+            exit 1
+          )
+
+      - name: Validate Java 21 in Linux or Mac
         if: runner.os != 'Windows'
-        run: echo "The operating system on the runner is not Windows, it's $RUNNER_OS."
+        run: |
+          if java -version 2>&1 | grep -q "version \"21"; then
+            echo "Java 21 is installed"
+          else
+            echo "Java 21 is not installed"
+            exit 1
+          fi
