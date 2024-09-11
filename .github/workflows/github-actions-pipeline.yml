@@ -31,21 +31,21 @@ jobs:
 
       - name: Publish Cucumber Business Report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: CucumberBusinessResults
           path: project/target/cucumber-html-reports
 
       - name: Publish Extend Report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: CAFResults
           path: project/Report.html
 
       - name: Publish Test Video
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: TestExecutionVideo
           path: project/target/testRecordings
