@@ -61,14 +61,14 @@ jobs:
       - name: Extract Linux
         if: runner.os != 'Windows'
         run: |
-          mkdir project && cd project
+          pwd && mkdir project && cd project
           unzip ../project.zip -d .
           mkdir target
 
       - name: Extract Windows
         if: runner.os == 'Windows'
         run: |
-          pwd && mkdir project && cd project
+          mkdir project && cd project
           tar -xf ../project.zip
           mkdir target
 
