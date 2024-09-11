@@ -1,11 +1,10 @@
 name: CI Pipeline
 
 on: [push, pull_request]
-
 jobs:
   generate-token:
     runs-on: [self-hosted, linux, x64]
     steps:
       - name: Read the variable
-        run: echo "My OS is ${{ vars.OSTYPE }}"
+        run: echo "My OS is ${{ vars.OSTYPE2 }}"
        
