@@ -30,4 +30,4 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
 
       - name: Display the extracted access_token
-        run: echo "Access Token: ${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
+        run: echo "Access Token:"."${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
