@@ -9,9 +9,6 @@ steps:
      jobs:
      generate-token:
      runs-on: [self-hosted, linux, x64]
-     strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
      steps:
       - name: Checkout repository
         uses: actions/checkout@v3
