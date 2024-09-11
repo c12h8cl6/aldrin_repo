@@ -5,9 +5,9 @@ on: [push, pull_request]
 jobs:
   validate-java:
     runs-on: [self-hosted, linux, x64]
-   # strategy:
-    #  matrix:
-     #   os: [ubuntu-latest, macos-latest, windows-latest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Validate Java 21
         run: |
@@ -29,6 +29,7 @@ jobs:
 
   generate-token:
     runs-on: [self-hosted, linux, x64]
+    needs: validate-java
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -53,10 +54,18 @@ jobs:
       - name: Display the extracted access_token
         run: echo "Access Token:" "${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
 
+  download-project:
+    runs-on: [self-hosted, linux, x64]
+    needs: generate-token
+    steps:
       - name: Download Project
         run: |
           curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ vars.PROJECT_URL }}"
 
+  extract-project:
+    runs-on: [self-hosted, linux, x64]
+    needs: download-project
+    steps:
       - name: Extract Linux
         if: runner.os != 'Windows'
         run: |
@@ -73,6 +82,7 @@ jobs:
 
   run-tests:
     runs-on: [self-hosted, linux, x64]
+    needs: extract-project
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -91,6 +101,10 @@ jobs:
           ENVTOUSE: ${{ secrets.ENVTOUSE }}
           TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
 
+  publish-reports:
+    runs-on: [self-hosted, linux, x64]
+    needs: run-tests
+    steps:
       - name: Publish Cucumber Business Report
         if: always()
         uses: actions/upload-artifact@v4
