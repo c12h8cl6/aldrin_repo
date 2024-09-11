@@ -3,46 +3,49 @@ name: CI Pipeline
 on: [push, pull_request]
 
 jobs:
-  generate-token:
+  run-tests:
     runs-on: [self-hosted, linux, x64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Generate access_token
-        id: generate_token
+    #  - name: Set up JDK 11
+     #   uses: actions/setup-java@v2
+      #  with:
+       #   java-version: '11'
+
+      - name: Run Tests
         run: |
-          ACCESS_TOKEN=$(curl -X POST 'https://keycloakdev.codelessauto.io/realms/test/protocol/openid-connect/token' \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          -d 'client_id=${{ vars.CLIENT_ID }}' \
-          -d 'grant_type=password' \
-          -d "username=${{ secrets.USERNAME }}" \
-          -d "password=${{ secrets.PASSWORD }}" | jq -r '.access_token')
+          cd project
+          java -cp "./Plugins/*" "-DenvToUse=${{ vars.ENVTOUSE }}" io.cucumber.core.cli.Main \
+          --plugin "me.jvt.cucumber.report.PrettyReports:./target" \
+          --plugin "html:./target/cucumber" \
+          --plugin "json:./target/cucumber-json/cucumber.json" \
+          --plugin "pretty" \
+          "./src/test/resources/features" \
+          --glue "com.accenture.stepdefs" \
+        #  "--tags" "${{ env.TAGS_TO_RUN }}"
+       # env:
+        #  ENV_TO_USE: ${{ secrets.ENV_TO_USE }}
+         # TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
 
-          if [ -z "$ACCESS_TOKEN" ]; then
-            echo "Error: Failed to generate access token"
-            exit 1
-          fi
+      - name: Publish Cucumber Business Report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: CucumberBusinessResults
+          path: project/target/cucumber-html-reports
 
-          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+      - name: Publish Extend Report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: CAFResults
+          path: project/Report.html
 
-      - name: Display the extracted access_token
-        run: echo "Access Token:" "${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
-
-      - name: Download Project
-        run: |
-          curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ vars.PROJECT_URL }}"
-
-      - name: Extract Linux
-        if: runner.os != 'Windows'
-        run: |
-          mkdir project && cd project
-          unzip ../project.zip -d .
-          mkdir target
-
-      - name: Extract Windows
-        if: runner.os == 'Windows'
-        run: |
-          mkdir project && cd project
-          tar -xf ../project.zip
-          mkdir target
+      - name: Publish Test Video
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: TestExecutionVideo
+          path: project/target/testRecordings
