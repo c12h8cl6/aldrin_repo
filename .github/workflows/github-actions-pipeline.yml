@@ -7,12 +7,12 @@ on: push
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
 
 
     env:
       OSTYPE: Linux
-      URL: ${{ secrets.FETCH_PROJECT_URL }}&downloadDrivers=true&osType=${{ env.OSTYPE }}&isMainBranch=true
+      URL: ${{ secrets.FETCH_PROJECT_URL }}&downloadDrivers=true&osType=$OSTYPE&isMainBranch=true
       
 
     steps:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Validate Java 21 in Windows
-        if: ${{ OSTYPE }} == 'Windows'
+        if: $OSTYPE == 'Windows'
         run: |
           java -version 2>&1 | findstr /C:"version \"21"
           if %errorlevel% == 0 (
@@ -31,7 +31,7 @@ jobs:
           )
 
       - name: Validate Java 21 in Linux or Mac
-        if: ${{ OSTYPE }} != 'Windows'
+        if: $OSTYPE != 'Windows'
         run: |
           if java -version 2>&1 | grep -q "version \"21"; then
             echo "Java 21 is installed"
