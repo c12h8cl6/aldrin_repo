@@ -1,97 +1,12 @@
-name: actions-CICD
-
-on: push
-# schedule:
-#    - cron: "*/30 22-23 * * 0-5"
-#    - cron: "*/30 0-10 * * 1-5"
+on: workflow_dispatch
 
 jobs:
-  build:
-    runs-on: [self-hosted, linux, x64]
-
-
-    env:
-      OSTYPE: Linux
-      ENVTOUSE: production
-      URL: ${{ secrets.FETCH_PROJECT_URL }}&downloadDrivers=true&osType=$OSTYPE&isMainBranch=true
-      
-
+  if-Windows-else:
+    runs-on: macos-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Validate Java 21 in Windows
-        if: $OSTYPE == 'Windows'
-        run: |
-          java -version 2>&1 | findstr /C:"version \"21"
-          if %errorlevel% == 0 (
-            echo Java 21 is installed
-          ) else (
-            echo Java 21 is not installed
-            exit 1
-          )
-
-      - name: Validate Java 21 in Linux or Mac
-        if: $OSTYPE != 'Windows'
-        run: |
-          if java -version 2>&1 | grep -q "version \"21"; then
-            echo "Java 21 is installed"
-          else
-            echo "Java 21 is not installed"
-            exit 1
-          fi
-
-      - name: Generate access_token
-        id: generate_token
-        run: |
-          ACCESS_TOKEN=$(curl -X POST 'https://keycloakdev.codelessauto.io/realms/test/protocol/openid-connect/token' \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          -d 'client_id=caf-client.staging' \
-          -d 'grant_type=password' \
-          -d 'username=ctasacceptanceid@accenture.com' \
-          -d 'password=${{ secrets.USER_PASSWORD }}' | jq -r '.access_token')
-          echo "::set-output name=ACCESS_TOKEN::$ACCESS_TOKEN"
-
-      - name: Display the extracted access_token
-        run: echo "Access Token:${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
-
-      - name: Download Project
-        run: |
-          curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ env.URL }}"
-
-      - name: Extract Linux
-        if: $OSTYPE  != 'Windows'
-        run: |
-          mkdir project && cd project
-          unzip ../project.zip -d .
-          mkdir target
-
-      - name: Extract Windows
-        if: $ OSTYPE  == 'Windows'
-        run: |
-          mkdir project && cd project
-          tar -xf ../project.zip
-          mkdir target
-
-      - name: Run Test
-        run: |
-          cd project
-          java -cp "./Plugins/*" "-DenvToUse=$ENV_TO_USE" io.cucumber.core.cli.Main --plugin "me.jvt.cucumber.report.PrettyReports:./target" --plugin "html:./target/cucumber" --plugin "json:./target/cucumber-json/cucumber.json" --plugin "pretty" "./src/test/resources/features" --glue "com.accenture.stepdefs" "--tags" "${{ secrets.TAGS_TO_RUN }}"
-
-      - name: Publish Cucumber Business Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: CucumberBusinessResults
-          path: project/target/cucumber-html-reports
-
-      - name: Publish Extend Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: CAFResults
-          path: project/Report.html
-
-      - name: Publish Test video
-        uses: actions/upload-artifact@v2
-        with:
-          name: TestExecutionVideo
-          path: project/target/testRecordings
+      - name: condition 1
+        if: runner.os == 'Windows'
+        run: echo "The operating system on the runner is $env:RUNNER_OS."
+      - name: condition 2
+        if: runner.os != 'Windows'
+        run: echo "The operating system on the runner is not Windows, it's $RUNNER_OS."
