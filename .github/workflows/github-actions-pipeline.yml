@@ -68,7 +68,7 @@ jobs:
       - name: Extract Windows
         if: runner.os == 'Windows'
         run: |
-          mkdir project && cd project
+          pwd && mkdir project && cd project
           tar -xf ../project.zip
           mkdir target
 
