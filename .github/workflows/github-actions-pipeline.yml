@@ -27,7 +27,7 @@ jobs:
         shell: cmd
         if: runner.os == 'Windows'
 
-  generate-token:
+  generate-token-dl-project:
     runs-on: [self-hosted, linux, x64]
     needs: validate-java
     steps:
@@ -54,18 +54,10 @@ jobs:
       - name: Display the extracted access_token
         run: echo "Access Token:" "${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
 
-  download-project:
-    runs-on: [self-hosted, linux, x64]
-    needs: generate-token
-    steps:
       - name: Download Project
         run: |
           curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ vars.PROJECT_URL }}"
 
-  extract-project:
-    runs-on: [self-hosted, linux, x64]
-    needs: download-project
-    steps:
       - name: Extract Linux
         if: runner.os != 'Windows'
         run: |
@@ -80,9 +72,10 @@ jobs:
           tar -xf ../project.zip
           mkdir target
 
+
   run-tests:
     runs-on: [self-hosted, linux, x64]
-    needs: extract-project
+    needs: generate-token-dl-project
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
