@@ -16,18 +16,18 @@ jobs:
           -H 'Content-Type: application/x-www-form-urlencoded' \
           -d 'client_id=caf-client.staging' \
           -d 'grant_type=password' \
-          -d "username=${{ secrets.USERNAME }}" \
-          -d "password=${{ secrets.PASSWORD }}" | jq -r '.access_token')
+          -d "username=ctasacceptanceid@accenture.com" \
+          -d "password=ctas@2024" | jq -r '.access_token')
 
           if [ -z "$ACCESS_TOKEN" ]; then
             echo "Error: Failed to generate access token"
             exit 1
           fi
 
-          echo "::set-output name=ACCESS_TOKEN::$ACCESS_TOKEN"
-        env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+        #env:
+         # USERNAME: ${{ secrets.USERNAME }}
+          #PASSWORD: ${{ secrets.PASSWORD }}
 
       - name: Display the extracted access_token
         run: echo "Access Token:"."${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
