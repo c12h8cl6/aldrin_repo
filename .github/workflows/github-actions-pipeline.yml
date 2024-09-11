@@ -12,6 +12,7 @@ jobs:
 
     env:
       OSTYPE: Linux
+      ENVTOUSE: production
       URL: ${{ secrets.FETCH_PROJECT_URL }}&downloadDrivers=true&osType=$OSTYPE&isMainBranch=true
       
 
@@ -75,7 +76,7 @@ jobs:
       - name: Run Test
         run: |
           cd project
-          java -cp "./Plugins/*" "-DenvToUse=${{ ENV_TO_USE }}" io.cucumber.core.cli.Main --plugin "me.jvt.cucumber.report.PrettyReports:./target" --plugin "html:./target/cucumber" --plugin "json:./target/cucumber-json/cucumber.json" --plugin "pretty" "./src/test/resources/features" --glue "com.accenture.stepdefs" "--tags" "${{ secrets.TAGS_TO_RUN }}"
+          java -cp "./Plugins/*" "-DenvToUse=$ENV_TO_USE" io.cucumber.core.cli.Main --plugin "me.jvt.cucumber.report.PrettyReports:./target" --plugin "html:./target/cucumber" --plugin "json:./target/cucumber-json/cucumber.json" --plugin "pretty" "./src/test/resources/features" --glue "com.accenture.stepdefs" "--tags" "${{ secrets.TAGS_TO_RUN }}"
 
       - name: Publish Cucumber Business Report
         uses: actions/upload-artifact@v2
