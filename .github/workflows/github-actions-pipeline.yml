@@ -40,8 +40,8 @@ steps:
         #env:
          # USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
-      - name: Display the extracted access_token
-        run: echo "Access Token:$ACCESS_TOKEN"
-        env:
-          ACCESS_TOKEN: ${{ steps.generate_token.outputs.ACCESS_TOKEN }}
-        continue-on-error: true
+      #- name: Display the extracted access_token
+       # run: echo "Access Token:$ACCESS_TOKEN"
+       # env:
+        #  ACCESS_TOKEN: ${{ steps.generate_token.outputs.ACCESS_TOKEN }}
+        #continue-on-error: true
