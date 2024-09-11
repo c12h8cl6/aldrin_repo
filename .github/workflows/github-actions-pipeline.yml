@@ -2,7 +2,7 @@ on: workflow_dispatch
 
 jobs:
   if-Windows-else:
-    runs-on: macos-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - name: condition 1
         if: runner.os == 'Windows'
