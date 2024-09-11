@@ -1,28 +1,13 @@
-on: workflow_dispatch
-steps:
-      #- name: Set up Java 21
-       # uses: actions/setup-java@v3
-        #with:
-         # java-version: '21'
-          #distribution: 'adopt'
+name: CI Pipeline
 
-    # jobs:
-     generate-token:
-     runs-on: [self-hosted, linux, x64]
-     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+on: [push, pull_request]
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-cache
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+jobs:
+  generate-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Generate access_token
         id: generate_token
@@ -31,14 +16,18 @@ steps:
           -H 'Content-Type: application/x-www-form-urlencoded' \
           -d 'client_id=caf-client.staging' \
           -d 'grant_type=password' \
-          -d 'username=ctasacceptanceid@accenture.com' \
-          -d 'password=ctas@2024' | jq -r '.access_token')
-          echo "::set-output name=ACCESS_TOKEN::$ACCESS_TOKEN"
-        #env:
-         # USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+          -d "username=${{ secrets.USERNAME }}" \
+          -d "password=${{ secrets.PASSWORD }}" | jq -r '.access_token')
 
-      #- name: Display the extracted access_token
-       # run: echo "Access Token:$ACCESS_TOKEN"
-       # env:
-        #  ACCESS_TOKEN: ${{ steps.generate_token.outputs.ACCESS_TOKEN }}
-        #continue-on-error: true
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Error: Failed to generate access token"
+            exit 1
+          fi
+
+          echo "::set-output name=ACCESS_TOKEN::$ACCESS_TOKEN"
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+
+      - name: Display the extracted access_token
+        run: echo "Access Token: ${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
