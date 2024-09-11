@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: Download Project
         run: |
-          curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ vars.PROJECT_URL }}"
+          curl -f -X POST -H "Authorization: Bearer" "${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ vars.PROJECT_URL }}"
 
   extract-project:
     runs-on: [self-hosted, linux, x64]
@@ -97,9 +97,9 @@ jobs:
           --plugin "pretty" \
           "./src/test/resources/features" \
           --glue "com.accenture.stepdefs"
-        env:
-          ENVTOUSE: ${{ secrets.ENVTOUSE }}
-          TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
+      #  env:
+      #    ENVTOUSE: ${{ secrets.ENVTOUSE }}
+      #   TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
 
   publish-reports:
     runs-on: [self-hosted, linux, x64]
