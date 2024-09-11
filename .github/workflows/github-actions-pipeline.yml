@@ -3,16 +3,79 @@ name: CI Pipeline
 on: [push, pull_request]
 
 jobs:
-  run-tests:
+  validate-java:
+    runs-on: [self-hosted, linux, x64]
+   # strategy:
+    #  matrix:
+     #   os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Validate Java 21
+        run: |
+          java -version 2>&1 | grep "version \"21" && echo "Java 21 is installed" || (echo "Java 21 is not installed" && exit 1)
+        shell: bash
+        if: runner.os != 'Windows'
+
+      - name: Validate Java 21 on Windows
+        run: |
+          java -version 2>&1 | findstr /C:"version \"21"
+          if %errorlevel% == 0 (
+            echo Java 21 is installed
+          ) else (
+            echo Java 21 is not installed
+            exit 1
+          )
+        shell: cmd
+        if: runner.os == 'Windows'
+
+  generate-token:
     runs-on: [self-hosted, linux, x64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-    #  - name: Set up JDK 11
-     #   uses: actions/setup-java@v2
-      #  with:
-       #   java-version: '11'
+      - name: Generate access_token
+        id: generate_token
+        run: |
+          ACCESS_TOKEN=$(curl -X POST 'https://keycloakdev.codelessauto.io/realms/test/protocol/openid-connect/token' \
+          -H 'Content-Type: application/x-www-form-urlencoded' \
+          -d 'client_id=${{ vars.CLIENT_ID }}' \
+          -d 'grant_type=password' \
+          -d "username=${{ secrets.USERNAME }}" \
+          -d "password=${{ secrets.PASSWORD }}" | jq -r '.access_token')
+
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Error: Failed to generate access token"
+            exit 1
+          fi
+
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Display the extracted access_token
+        run: echo "Access Token:" "${{ steps.generate_token.outputs.ACCESS_TOKEN }}"
+
+      - name: Download Project
+        run: |
+          curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ vars.PROJECT_URL }}"
+
+      - name: Extract Linux
+        if: runner.os != 'Windows'
+        run: |
+          mkdir project && cd project
+          unzip ../project.zip -d .
+          mkdir target
+
+      - name: Extract Windows
+        if: runner.os == 'Windows'
+        run: |
+          mkdir project && cd project
+          tar -xf ../project.zip
+          mkdir target
+
+  run-tests:
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Run Tests
         run: |
@@ -23,11 +86,10 @@ jobs:
           --plugin "json:./target/cucumber-json/cucumber.json" \
           --plugin "pretty" \
           "./src/test/resources/features" \
-          --glue "com.accenture.stepdefs" \
-        #  "--tags" "${{ env.TAGS_TO_RUN }}"
-       # env:
-        #  ENV_TO_USE: ${{ secrets.ENV_TO_USE }}
-         # TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
+          --glue "com.accenture.stepdefs"
+        env:
+          ENVTOUSE: ${{ secrets.ENVTOUSE }}
+          TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
 
       - name: Publish Cucumber Business Report
         if: always()
