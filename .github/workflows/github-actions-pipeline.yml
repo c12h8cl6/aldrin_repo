@@ -59,14 +59,14 @@ jobs:
           curl -f -X POST -H "Authorization: Bearer ${{ steps.generate_token.outputs.ACCESS_TOKEN }}" --output project.zip "${{ env.URL }}"
 
       - name: Extract Linux
-        if: ${{ OSTYPE }} != 'Windows'
+        if: $OSTYPE  != 'Windows'
         run: |
           mkdir project && cd project
           unzip ../project.zip -d .
           mkdir target
 
       - name: Extract Windows
-        if: ${{ OSTYPE }} == 'Windows'
+        if: $ OSTYPE  == 'Windows'
         run: |
           mkdir project && cd project
           tar -xf ../project.zip
