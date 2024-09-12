@@ -72,11 +72,6 @@ jobs:
           tar -xf ../project.zip
           mkdir target
 
-
-  run-tests:
-    runs-on: [self-hosted, linux, x64]
-    needs: generate-token-dl-project
-    steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -98,14 +93,10 @@ jobs:
           --plugin "pretty" \
           "./src/test/resources/features" \
           --glue "com.accenture.stepdefs"
-        env:
-          ENVTOUSE: ${{ secrets.ENVTOUSE }}
-          TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
+       # env:
+        #  ENVTOUSE: ${{ secrets.ENVTOUSE }}
+         # TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
 
-  publish-reports:
-    runs-on: [self-hosted, linux, x64]
-    needs: run-tests
-    steps:
       - name: Publish Cucumber Business Report
         if: always()
         uses: actions/upload-artifact@v4
