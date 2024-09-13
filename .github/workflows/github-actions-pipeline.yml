@@ -81,7 +81,7 @@ jobs:
           --plugin "json:./target/cucumber-json/cucumber.json" \
           --plugin "pretty" \
           "./src/test/resources/features" \
-          --glue "com.accenture.stepdefs" "--tags"
+          --glue "com.accenture.stepdefs" "--tags" "@Browser_Login_LoginToCTAS"
        # env:
         #  ENVTOUSE: ${{ secrets.ENVTOUSE }}
          # TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
