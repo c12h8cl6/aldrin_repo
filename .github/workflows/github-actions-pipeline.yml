@@ -106,3 +106,10 @@ jobs:
         with:
           name: TestExecutionVideo
           path: project/target/testRecordings
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Infra Cleanup
+        if: always()
+        run: rm -rf ${{ github.workspace }}/*
