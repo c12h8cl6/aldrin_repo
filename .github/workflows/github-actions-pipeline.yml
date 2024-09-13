@@ -75,13 +75,13 @@ jobs:
       - name: Run Tests
         run: |
           cd project
-          java -cp "./Plugins/*" "-DenvToUse=${{ vars.ENVTOUSE }}" io.cucumber.core.cli.Main \
+          java -cp "./Plugins/*" "-DenvToUse=production" io.cucumber.core.cli.Main \
           --plugin "me.jvt.cucumber.report.PrettyReports:./target" \
           --plugin "html:./target/cucumber" \
           --plugin "json:./target/cucumber-json/cucumber.json" \
           --plugin "pretty" \
           "./src/test/resources/features" \
-          --glue "com.accenture.stepdefs"
+          --glue "com.accenture.stepdefs" "--tags" "@Browser_Login_LoginToCTAS"
        # env:
         #  ENVTOUSE: ${{ secrets.ENVTOUSE }}
          # TAGS_TO_RUN: ${{ secrets.TAGS_TO_RUN }}
